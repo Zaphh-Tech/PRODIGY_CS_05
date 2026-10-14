@@ -1,24 +1,11 @@
-# little startup banner for my prodigy tools - Zaphh-Tech
-# shows an ascii logo with a moving light sweep, then the tool name.
-# stays quiet when output isn't a real terminal (pipes/graders).
+# startup banner for the prodigy tools - by Zaphh-Tech
+# shows the project name with a moving colour sweep. quiet when piped.
 
 import sys
 import time
 
-LOGO = [
-    "███████╗ █████╗ ██████╗ ██╗  ██╗██╗  ██╗",
-    "╚══███╔╝██╔══██╗██╔══██╗██║  ██║██║  ██║",
-    "  ███╔╝ ███████║██████╔╝███████║███████║",
-    " ███╔╝  ██╔══██║██╔═══╝ ██╔══██║██╔══██║",
-    "███████╗██║  ██║██║     ██║  ██║██║  ██║",
-    "╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝",
-    "   Z A P H H  -  T E C H   //  cyber    ",
-]
-
-C = {
-    "reset": "\033[0m", "dim": "\033[2m", "base": "\033[38;5;44m",   # teal
-    "glow": "\033[1;38;5;51m", "hot": "\033[1;97m", "accent": "\033[38;5;120m",
-}
+C = {"reset": "\033[0m", "dim": "\033[2m", "base": "\033[38;5;44m",
+     "glow": "\033[1;38;5;51m", "hot": "\033[1;97m", "accent": "\033[38;5;120m"}
 
 
 def _tty():
@@ -28,61 +15,41 @@ def _tty():
         return False
 
 
-def _slow(text, color, delay=0.012):
-    for ch in text:
-        sys.stdout.write(color + ch + C["reset"])
-        sys.stdout.flush()
-        time.sleep(delay)
-    sys.stdout.write("\n")
-
-
-def boot(tool, code, tagline=""):
-    """Animated boot banner. No-op (prints nothing) on a non-tty."""
+def boot(name, code, tagline=""):
     if not _tty():
         return
-    w = max(len(l) for l in LOGO)
-    # 1. draw the logo once (base colour)
-    for l in LOGO:
-        print(C["base"] + l + C["reset"])
-    # 2. moving light sweep: redraw in place with a bright column travelling
-    for pos in range(-4, w + 6, 2):
-        sys.stdout.write(f"\033[{len(LOGO)}A")           # cursor up to logo top
-        for l in LOGO:
+    name = name.upper()
+    inner = max(len(name), len(f"PRODIGY {code}  -  by Zaphh-Tech"), len(tagline)) + 6
+    top = "╔" + "═" * inner + "╗"
+    bot = "╚" + "═" * inner + "╝"
+    line2 = "   PRODIGY " + code + "  -  by Zaphh-Tech"
+    rows = [top,
+            "║" + " " * inner + "║",
+            "║   " + name + " " * (inner - 3 - len(name)) + "║",
+            "║" + line2 + " " * (inner - len(line2)) + "║",
+            "║" + " " * inner + "║",
+            bot]
+    for r in rows:
+        print(C["base"] + r + C["reset"])
+    # moving light sweep across the box
+    for pos in range(-3, inner + 5, 2):
+        sys.stdout.write(f"\033[{len(rows)}A")
+        for r in rows:
             out = []
-            for i, ch in enumerate(l):
-                if ch == " ":
-                    out.append(" "); continue
+            for i, ch in enumerate(r):
                 d = abs(i - pos)
-                if d <= 1:
-                    out.append(C["hot"] + ch + C["reset"])
-                elif d <= 3:
-                    out.append(C["glow"] + ch + C["reset"])
-                else:
-                    out.append(C["base"] + ch + C["reset"])
+                col = C["hot"] if d <= 1 else C["glow"] if d <= 3 else C["base"]
+                out.append(col + ch + C["reset"])
             sys.stdout.write("".join(out) + "\033[K\n")
         sys.stdout.flush()
-        time.sleep(0.03)
-    # 3. settle to accent colour
-    sys.stdout.write(f"\033[{len(LOGO)}A")
-    for l in LOGO:
-        sys.stdout.write(C["accent"] + l + C["reset"] + "\033[K\n")
-    # 4. tool line + msf-style init spinner
-    bar = C["dim"] + "=" * w + C["reset"]
-    print(bar)
-    _slow(f"   [ {tool}  ·  PRODIGY {code} ]", C["glow"], 0.010)
+        time.sleep(0.025)
+    sys.stdout.write(f"\033[{len(rows)}A")
+    for r in rows:
+        sys.stdout.write(C["accent"] + r + C["reset"] + "\033[K\n")
     if tagline:
-        _slow(f"   {tagline}", C["dim"], 0.006)
-    spin = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
-    msg = "   [*] loading module"
-    sys.stdout.write(C["accent"] + msg + C["reset"])
-    sys.stdout.flush()
-    for i in range(14):
-        sys.stdout.write("\r" + C["accent"] + msg + " " + spin[i % len(spin)] + C["reset"])
-        sys.stdout.flush()
-        time.sleep(0.045)
-    sys.stdout.write("\r" + C["accent"] + msg + " " + C["accent"] + "ready\033[K" + C["reset"] + "\n")
-    print(bar + "\n")
+        print(C["dim"] + "   " + tagline + C["reset"])
+    print()
 
 
 if __name__ == "__main__":
-    boot("Caesar Cipher", "CS-01", "classic shift cipher - encrypt / decrypt text")
+    boot("Caesar Cipher", "CS-01", "classic shift cipher - encrypt / decrypt")
