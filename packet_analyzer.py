@@ -7,6 +7,12 @@ import datetime
 import sys
 
 try:
+    from brand import boot
+except Exception:
+    def boot(*a, **k):
+        pass
+
+try:
     from scapy.all import IP, TCP, UDP, ICMP, Raw, rdpcap, sniff
     from scapy.error import Scapy_Exception
 except ImportError:
@@ -139,6 +145,7 @@ def main(argv=None):
     p.add_argument("--count", type=int, default=10)
     p.add_argument("--timeout", type=int, default=15)
     a = p.parse_args(argv)
+    boot("Packet Analyzer", "CS-05", "reads a pcap or sniffs - shows ip + proto")
     if a.read:
         read_file(a.read)
     elif a.sniff:
