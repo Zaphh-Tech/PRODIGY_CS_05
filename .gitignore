@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+*.log
+keystrokes.log
+.DS_Store
