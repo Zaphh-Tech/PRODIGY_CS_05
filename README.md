@@ -1,25 +1,55 @@
-# My Prodigy Task 5 - Packet Analyzer
+# PRODIGY_CS_05
 
-Reads packets and prints from/to ip, protocol and a bit of the payload. Made with scapy.
+A network packet analyzer written in Python with Scapy, built for Task 5 of the
+Prodigy InfoTech Cyber Security internship.
 
-Please only use on your own network or the sample pcap. Don't sniff other people's traffic.
+It reads network packets and prints a short summary of each one — where it came from,
+where it's going, the protocol, and a preview of the data inside.
 
-## how to run
+## What it does
 
-```
+- Reads a saved `.pcap` file or sniffs live traffic
+- Picks out TCP, UDP and ICMP packets
+- Shows source/destination IP, protocol and a payload preview (text when readable, hex otherwise)
+- Prints a total count per protocol at the end
+
+## Ethics
+
+Only run this on your own network or on the sample pcap. Don't capture other people's traffic.
+
+## Setup
+
+```bash
 pip install scapy
+```
 
+## How to run
+
+```bash
+# read the included sample capture (no root needed)
 python3 packet_analyzer.py --read test.pcap
-```
 
-Live capture (needs sudo, own wifi only):
-```
+# live capture on your own network (needs sudo for raw sockets)
 sudo python3 packet_analyzer.py --sniff --count 10 --timeout 15
 ```
 
-`test.pcap` is one I generated myself (3 packets, TCP + UDP + ICMP), no real traffic in it.
+## Example output
 
-## files
+```
+$ python3 packet_analyzer.py --read test.pcap
+--- packet 1 ---
+  proto: TCP
+  from: 192.168.1.10
+  to:   93.184.216.34
+...
+== total ==
+  packets: 3
+  TCP: 1
+  UDP: 1
+  ICMP: 1
+```
 
-- `packet_analyzer.py` - `analyze_packet()` prints one packet, totals at the end
-- `test.pcap` - sample file to try `--read` with
+## Files
+
+- `packet_analyzer.py` — `analyze_packet()` prints one packet, totals at the end
+- `test.pcap` — sample capture (3 packets: TCP + UDP + ICMP), made for testing `--read`
